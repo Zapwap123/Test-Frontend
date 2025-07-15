@@ -20,6 +20,25 @@
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": ["src/styles.css"],
             "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true
+              // You can add this if you plan to use environments
+              // "fileReplacements": [
+              //   {
+              //     "replace": "src/environments/environment.ts",
+              //     "with": "src/environments/environment.prod.ts"
+              //   }
+              // ]
+            }
           }
         },
         "serve": {
