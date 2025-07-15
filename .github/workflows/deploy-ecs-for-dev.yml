@@ -1,0 +1,45 @@
+name: Deploy to ECS
+
+on:
+  workflow_call:
+    inputs:
+      image_uri:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
+      CLUSTER: dev-cluster
+      SERVICE: frontend-dev-service
+      TASK_DEF_FILE: ecs-task-def-frontend-dev.json
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/github-frontend-dev-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update task definition
+        run: |
+          sed -i "s|<IMAGE_URI>|${{ inputs.image_uri }}|g" $TASK_DEF_FILE
+
+      - name: Register task definition
+        id: task-def
+        run: |
+          TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://$TASK_DEF_FILE --query "taskDefinition.taskDefinitionArn" --output text)
+          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+
+      - name: Force ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster $CLUSTER \
+            --service $SERVICE \
+            --task-definition $TASK_DEF_ARN \
+            --force-new-deployment \
+            --region $AWS_REGION
