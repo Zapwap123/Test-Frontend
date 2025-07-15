@@ -13,15 +13,12 @@ jobs:
     outputs:
       image_uri: ${{ steps.push.outputs.image_uri }}
 
-    env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      ECR_REPO: ${{ secrets.ECR_REPO }}
-      ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
@@ -30,11 +27,11 @@ jobs:
           npm ci
           npm run build -- --configuration production
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
@@ -43,6 +40,8 @@ jobs:
         id: push
         env:
           IMAGE_TAG: ${{ github.sha }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
           IMAGE_URI=$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
