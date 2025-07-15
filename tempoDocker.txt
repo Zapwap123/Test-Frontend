@@ -36,3 +36,7 @@ CMD ["nginx", "-g", "daemon off;"]
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s CMD curl -f http://localhost/ || exit 1
 # This healthcheck will ensure that the Nginx server is running and serving the Angular app
 # If the healthcheck fails, it will exit with a non-zero status, indicating an issue with the container.
+
+--------------------------------
+
+just testing ci/cd 1
