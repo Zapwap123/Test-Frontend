@@ -20,9 +20,9 @@ jobs:
         run: npm ci
 
       - name: Run Tests
+        id: test
         run: npm test
         continue-on-error: true
-        id: test
 
       - name: Notify Slack if tests fail
         if: steps.test.outcome == 'failure'
@@ -30,8 +30,8 @@ jobs:
         with:
           payload: |
             {
-              "channel": "#dev",
-              "text": ":x: *Frontend CI:* Tests failed. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+              "text": ":x: *Frontend Dev CI:* Tests failed.\n🔗 <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

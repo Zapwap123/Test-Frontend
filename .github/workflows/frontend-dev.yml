@@ -7,14 +7,17 @@ on:
 
 jobs:
   test:
-    uses: ./.github/workflows/test-and-notify.yml
+    name: Run Tests and Notify
+    uses: ./.github/workflows/deploy-test-and-notify-for-dev.yml
 
   build:
+    name: Build & Push Docker Image
     needs: test
-    uses: ./.github/workflows/build-and-push.yml
+    uses: ./.github/workflows/deploy-build-and-push-for-dev.yml
 
   deploy:
+    name: Deploy to ECS (Dev)
     needs: build
-    uses: ./.github/workflows/deploy-ecs.yml
+    uses: ./.github/workflows/deploy-ecs-for-dev.yml
     with:
       image_uri: ${{ needs.build.outputs.image_uri }}

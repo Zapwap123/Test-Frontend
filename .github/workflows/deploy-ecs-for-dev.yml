@@ -12,27 +12,32 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: us-east-1
-      CLUSTER: dev-cluster
-      SERVICE: frontend-dev-service
-      TASK_DEF_FILE: ecs-task-def-frontend-dev.json
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      CLUSTER: ${{ secrets.ECS_CLUSTER }}
+      SERVICE: ${{ secrets.ECS_SERVICE }}
+      TASK_DEF_FILE: ${{ secrets.TASK_DEF_FILE }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/github-frontend-dev-role
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Update task definition
+      - name: Replace image URI in ECS task definition
         run: |
-          sed -i "s|<IMAGE_URI>|${{ inputs.image_uri }}|g" $TASK_DEF_FILE
+          sed -i "s|<IMAGE_URI>|${{ inputs.image_uri }}|g" infrastructure/$TASK_DEF_FILE
 
-      - name: Register task definition
+      - name: Register new task definition
         id: task-def
         run: |
-          TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://$TASK_DEF_FILE --query "taskDefinition.taskDefinitionArn" --output text)
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://infrastructure/$TASK_DEF_FILE \
+            --query "taskDefinition.taskDefinitionArn" \
+            --output text)
           echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
 
       - name: Force ECS deployment
