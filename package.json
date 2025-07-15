@@ -1,11 +1,12 @@
 {
   "name": "frontend-angular",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "start": "ng serve",
-    "build": "ng build"
+    "build": "ng build",
+    "test": "echo \"No tests yet. Skipping...\" && exit 0"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^15.2.0",
     "@angular/common": "^15.2.0",
