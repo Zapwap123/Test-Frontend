@@ -6,21 +6,17 @@ on:
       image_uri:
         required: true
         type: string
+    secrets:
       AWS_REGION:
         required: true
-        type: string
       AWS_ROLE_TO_ASSUME:
         required: true
-        type: string
       ECS_CLUSTER:
         required: true
-        type: string
       ECS_SERVICE:
         required: true
-        type: string
       TASK_DEF_FILE:
         required: true
-        type: string
 
 jobs:
   deploy:
@@ -33,41 +29,19 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ inputs.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ inputs.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
           audience: sts.amazonaws.com
-
-      - name: Show image URI received
-        run: echo "image_uri input: $IMAGE_URI"
-        env:
-          IMAGE_URI: ${{ inputs.image_uri }}
-
-      - name: List task definition file
-        run: ls -la Infrastructure/${{ inputs.TASK_DEF_FILE }}
-
-      - name: Show task definition before replacement
-        run: cat Infrastructure/${{ inputs.TASK_DEF_FILE }}
 
       - name: Replace image URI in ECS task definition
         run: |
-          sed -i "s|<IMAGE_URI>|${{ inputs.image_uri }}|g" Infrastructure/${{ inputs.TASK_DEF_FILE }}
-
-      - name: Show task definition after replacement
-        run: cat Infrastructure/${{ inputs.TASK_DEF_FILE }}
-
-      - name: Fail early if replacement did not work
-        run: |
-          if grep -q "<IMAGE_URI>" Infrastructure/${{ inputs.TASK_DEF_FILE }}; then
-            echo "ERROR: <IMAGE_URI> was NOT replaced!"
-            exit 1
-          fi
-          echo "<IMAGE_URI> was successfully replaced."
+          sed -i "s|<IMAGE_URI>|${{ inputs.image_uri }}|g" Infrastructure/${{ secrets.TASK_DEF_FILE }}
 
       - name: Register new ECS task definition
         id: task-def
         run: |
           TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://Infrastructure/${{ inputs.TASK_DEF_FILE }} \
+            --cli-input-json file://Infrastructure/${{ secrets.TASK_DEF_FILE }} \
             --query "taskDefinition.taskDefinitionArn" \
             --output text)
           echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
@@ -75,8 +49,8 @@ jobs:
       - name: Force ECS deployment
         run: |
           aws ecs update-service \
-            --cluster ${{ inputs.ECS_CLUSTER }} \
-            --service ${{ inputs.ECS_SERVICE }} \
+            --cluster ${{ secrets.ECS_CLUSTER }} \
+            --service ${{ secrets.ECS_SERVICE }} \
             --task-definition $TASK_DEF_ARN \
             --force-new-deployment \
-            --region ${{ inputs.AWS_REGION }}
+            --region ${{ secrets.AWS_REGION }}
