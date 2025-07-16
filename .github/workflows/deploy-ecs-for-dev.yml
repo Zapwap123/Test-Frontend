@@ -34,7 +34,9 @@ jobs:
           audience: sts.amazonaws.com
 
       - name: Show image URI received
-        run: echo " image_uri input: ${{ inputs.image_uri }}"
+        run: echo "image_uri input: $IMAGE_URI"
+        env:
+          IMAGE_URI: ${{ inputs.image_uri }}
 
       - name: List task definition file
         run: ls -la Infrastructure/${{ secrets.TASK_DEF_FILE }}
@@ -49,7 +51,7 @@ jobs:
       - name: Show task definition after replacement
         run: cat Infrastructure/${{ secrets.TASK_DEF_FILE }}
 
-      - name: Fail early if replacement didn’t work
+      - name: Fail early if replacement did not work
         run: |
           if grep -q "<IMAGE_URI>" Infrastructure/${{ secrets.TASK_DEF_FILE }}; then
             echo " ERROR: <IMAGE_URI> was NOT replaced!"
