@@ -2,6 +2,11 @@ name: Test and Notify
 
 on:
   workflow_call:
+    secrets:
+      SLACK_BOT_TOKEN:
+        required: true
+      SLACK_CHANNEL_ID:
+        required: true
 
 jobs:
   test:
