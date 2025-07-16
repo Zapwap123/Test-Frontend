@@ -51,3 +51,7 @@ jobs:
           docker push $IMAGE_URI
 
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
+
+      - name: Update ECS task definition with image URI
+        run: |
+          sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" Infrastructure/ecs-task-def-frontend-dev.json

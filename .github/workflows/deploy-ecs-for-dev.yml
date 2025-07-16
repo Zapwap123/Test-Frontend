@@ -25,19 +25,19 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::265267290744:role/github-devjobs-frontend-dev-role
-          aws-region: eu-central-1
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
 
       - name: Replace image URI in ECS task definition
         run: |
-          sed -i "s|<IMAGE_URI>|${{ inputs.image_uri }}|g" Infrastructure/$TASK_DEF_FILE
+          sed -i "s|<IMAGE_URI>|${{ inputs.image_uri }}|g" Infrastructure/${TASK_DEF_FILE}
 
-      - name: Register new task definition
+      - name: Register new ECS task definition
         id: task-def
         run: |
           TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://Infrastructure/$TASK_DEF_FILE \
+            --cli-input-json file://Infrastructure/${TASK_DEF_FILE} \
             --query "taskDefinition.taskDefinitionArn" \
             --output text)
           echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV

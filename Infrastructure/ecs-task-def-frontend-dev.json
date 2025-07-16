@@ -8,7 +8,7 @@
   "containerDefinitions": [
     {
       "name": "frontend",
-      "image": "265267290744.dkr.ecr.eu-central-1.amazonaws.com/devjobs/dev",
+      "image": "265267290744.dkr.ecr.eu-central-1.amazonaws.com/devjobs/dev:<IMAGE_TAG>",
       "portMappings": [
         {
           "containerPort": 80,
