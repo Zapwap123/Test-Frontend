@@ -57,8 +57,6 @@ jobs:
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
 
+          # Ensure GitHub doesn't treat this as a secret and suppress it
+          echo "::add-mask::$IMAGE_URI"
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
-
-      - name: Update ECS task definition with image URI
-        run: |
-          sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" Infrastructure/ecs-task-def-frontend-dev.json
