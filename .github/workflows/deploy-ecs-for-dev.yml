@@ -34,7 +34,7 @@ jobs:
           audience: sts.amazonaws.com
 
       - name: Show image URI received
-        run: echo "🧩 image_uri input: ${{ inputs.image_uri }}"
+        run: echo " image_uri input: ${{ inputs.image_uri }}"
 
       - name: List task definition file
         run: ls -la Infrastructure/${{ secrets.TASK_DEF_FILE }}
@@ -52,10 +52,10 @@ jobs:
       - name: Fail early if replacement didn’t work
         run: |
           if grep -q "<IMAGE_URI>" Infrastructure/${{ secrets.TASK_DEF_FILE }}; then
-            echo "❌ ERROR: <IMAGE_URI> was NOT replaced!"
+            echo " ERROR: <IMAGE_URI> was NOT replaced!"
             exit 1
           fi
-          echo "✅ <IMAGE_URI> was successfully replaced."
+          echo " <IMAGE_URI> was successfully replaced."
 
       - name: Register new ECS task definition
         id: task-def
