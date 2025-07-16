@@ -25,7 +25,7 @@ COPY --from=builder /app/dist/* /usr/share/nginx/html
 
 # Custom Nginx config (make sure nginx.conf is in devops folder)
 # COPY devops/nginx.conf /etc/nginx/nginx.conf
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 
 # Expose port 80
