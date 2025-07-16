@@ -30,11 +30,10 @@ jobs:
     name: Deploy to ECS (Dev)
     needs: build
     uses: ./.github/workflows/deploy-ecs-for-dev.yml
-    with:
-      image_uri: ${{ needs.build.outputs.image_uri }}
     secrets:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
       ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
       ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
       TASK_DEF_FILE: ${{ secrets.TASK_DEF_FILE }}
+      ECR_REPO: ${{ secrets.ECR_REPO }}

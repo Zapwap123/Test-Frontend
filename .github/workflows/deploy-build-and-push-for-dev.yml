@@ -9,16 +9,10 @@ on:
         required: true
       ECR_REPO:
         required: true
-    outputs:
-      image_uri:
-        description: "Image URI"
-        value: ${{ jobs.build.outputs.image_uri }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      image_uri: ${{ steps.push.outputs.image_uri }}
 
     steps:
       - name: Checkout source
@@ -45,7 +39,6 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build and push Docker image to ECR
-        id: push
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
@@ -57,9 +50,6 @@ jobs:
           docker build -t "$IMAGE_URI" .
           docker push "$IMAGE_URI"
 
-          echo "::add-mask::$IMAGE_URI"
-          echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
-
-      - name: Update ECS task definition with image URI
+      - name: Update ECS task definition with image tag
         run: |
           sed -i "s|<IMAGE_TAG>|${{ github.sha }}|g" Infrastructure/ecs-task-def-frontend-dev.json
