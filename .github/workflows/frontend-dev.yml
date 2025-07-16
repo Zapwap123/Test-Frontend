@@ -17,27 +17,72 @@ jobs:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
 
-  build-wrapper:
-    name: Wrapper for Build & Push Docker Image
+  build:
+    name: Build & Push Docker Image
     needs: test
+    uses: ./.github/workflows/deploy-build-and-push-for-dev.yml
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      ECR_REPO: ${{ secrets.ECR_REPO }}name: Frontend Dev CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    name: Run Tests and Notify
+    uses: ./.github/workflows/deploy-test-and-notify-for-dev.yml
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+
+  build:
+    name: Build & Push Docker Image
+    needs: test
+    uses: ./.github/workflows/deploy-build-and-push-for-dev.yml
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      ECR_REPO: ${{ secrets.ECR_REPO }}
+
+  extract-output:
+    name: Extract Image URI
+    needs: build
     runs-on: ubuntu-latest
     outputs:
-      image_uri: ${{ steps.call-build.outputs.image_uri }}
+      image_uri: ${{ steps.get-output.outputs.image_uri }}
     steps:
-      - name: Call Reusable Build Workflow
-        id: call-build
-        uses: ./.github/workflows/deploy-build-and-push-for-dev.yml
-        secrets:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          ECR_REPO: ${{ secrets.ECR_REPO }}
+      - name: Get image_uri from previous job
+        id: get-output
+        run: echo "image_uri=${{ needs.build.outputs.image_uri }}" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy to ECS (Dev)
-    needs: build-wrapper
+    needs: extract-output
     uses: ./.github/workflows/deploy-ecs-for-dev.yml
     with:
-      image_uri: ${{ needs.build-wrapper.outputs.image_uri }}
+      image_uri: ${{ needs.extract-output.outputs.image_uri }}
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+      ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+      TASK_DEF_FILE: ${{ secrets.TASK_DEF_FILE }}
+
+
+  deploy:
+    name: Deploy to ECS (Dev)
+    needs: build
+    uses: ./.github/workflows/deploy-ecs-for-dev.yml
+    with:
+      image_uri: ${{ needs.build.outputs.image_uri }}
     secrets:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
