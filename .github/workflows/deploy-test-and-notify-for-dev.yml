@@ -2,13 +2,6 @@ name: Test and Notify
 
 on:
   workflow_call:
-    inputs:
-      SLACK_BOT_TOKEN:
-        required: true
-        type: string
-      SLACK_CHANNEL_ID:
-        required: true
-        type: string
 
 jobs:
   test:
@@ -37,8 +30,8 @@ jobs:
         with:
           payload: |
             {
-              "channel": "${{ inputs.SLACK_CHANNEL_ID }}",
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
               "text": ":x: *Frontend Dev CI:* Tests failed.\n🔗 <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
             }
         env:
-          SLACK_BOT_TOKEN: ${{ inputs.SLACK_BOT_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
