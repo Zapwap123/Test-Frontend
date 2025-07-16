@@ -40,8 +40,8 @@ jobs:
       - name: Build and push Docker image to ECR
         id: push
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_REPO: ${{ secrets.ECR_REPO }}
+          AWS_REGION: eu-central-1
+          ECR_REPO: devjobs/dev
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
           IMAGE_TAG=${{ github.sha }}
