@@ -26,23 +26,12 @@ jobs:
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
       ECR_REPO: ${{ secrets.ECR_REPO }}
 
-  extract-output:
-    name: Extract Image URI
-    needs: build
-    runs-on: ubuntu-latest
-    outputs:
-      image_uri: ${{ steps.get-output.outputs.image_uri }}
-    steps:
-      - name: Get image_uri from previous job
-        id: get-output
-        run: echo "image_uri=${{ needs.build.outputs.image_uri }}" >> $GITHUB_OUTPUT
-
   deploy:
     name: Deploy to ECS (Dev)
-    needs: extract-output
+    needs: build
     uses: ./.github/workflows/deploy-ecs-for-dev.yml
     with:
-      image_uri: ${{ needs.extract-output.outputs.image_uri }}
+      image_uri: ${{ needs.build.outputs.image_uri }}
     secrets:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
