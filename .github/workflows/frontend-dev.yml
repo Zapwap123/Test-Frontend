@@ -5,7 +5,6 @@ on:
     branches:
       - dev
 
-# Required for OIDC authentication with AWS
 permissions:
   id-token: write
   contents: read
@@ -15,8 +14,8 @@ jobs:
     name: Run Tests and Notify
     uses: ./.github/workflows/deploy-test-and-notify-for-dev.yml
     with:
-      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+      slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+      slack_channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
 
   build:
     name: Build & Push Docker Image
