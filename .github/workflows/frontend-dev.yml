@@ -17,21 +17,27 @@ jobs:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
 
-  build:
-    name: Build & Push Docker Image
+  build-wrapper:
+    name: Wrapper for Build & Push Docker Image
     needs: test
-    uses: ./.github/workflows/deploy-build-and-push-for-dev.yml
-    secrets:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-      ECR_REPO: ${{ secrets.ECR_REPO }}
+    runs-on: ubuntu-latest
+    outputs:
+      image_uri: ${{ steps.call-build.outputs.image_uri }}
+    steps:
+      - name: Call Reusable Build Workflow
+        id: call-build
+        uses: ./.github/workflows/deploy-build-and-push-for-dev.yml
+        secrets:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
 
   deploy:
     name: Deploy to ECS (Dev)
-    needs: build
+    needs: build-wrapper
     uses: ./.github/workflows/deploy-ecs-for-dev.yml
     with:
-      image_uri: ${{ needs.build.outputs.image_uri }}
+      image_uri: ${{ needs.build-wrapper.outputs.image_uri }}
     secrets:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
