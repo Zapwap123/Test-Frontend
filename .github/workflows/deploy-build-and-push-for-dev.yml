@@ -11,6 +11,8 @@ on:
         required: true
       TASK_DEF_FILE:
         required: true
+      EXECUTION_ROLE_ARN:
+        required: true
 
 jobs:
   build:
@@ -55,3 +57,4 @@ jobs:
       - name: Update ECS task definition with image tag
         run: |
           sed -i "s|<IMAGE_URI>|$IMAGE_URI|g" Infrastructure/${{ secrets.TASK_DEF_FILE }}
+          sed -i "s|<EXECUTION_ROLE_ARN>|${{ secrets.EXECUTION_ROLE_ARN }}|g" Infrastructure/${{ secrets.TASK_DEF_FILE }}
