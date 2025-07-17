@@ -9,8 +9,6 @@ on:
         required: true
       ECR_REPO:
         required: true
-      TASK_DEF_FILE:
-        required: true
       EXECUTION_ROLE_ARN:
         required: true
 
