@@ -25,6 +25,7 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
       ECR_REPO: ${{ secrets.ECR_REPO }}
+      TASK_DEF_FILE: ${{ secrets.TASK_DEF_FILE }}
 
   deploy:
     name: Deploy to ECS (Dev)
