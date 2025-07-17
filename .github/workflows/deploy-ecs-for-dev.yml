@@ -1,4 +1,4 @@
-name: Deploy to ECS
+name: Deploy to ECS (Dev)
 
 on:
   workflow_call:
@@ -11,11 +11,17 @@ on:
         required: true
       ECS_SERVICE:
         required: true
-      TASK_DEF_FILE:
-        required: true
       ECR_REPO:
         required: true
       EXECUTION_ROLE_ARN:
+        required: true
+      TASK_CPU:
+        required: true
+      TASK_MEMORY:
+        required: true
+      CONTAINER_NAME:
+        required: true
+      CONTAINER_PORT:
         required: true
 
 jobs:
@@ -41,16 +47,38 @@ jobs:
           IMAGE_URI="${ACCOUNT_ID}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO }}:${IMAGE_TAG}"
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      - name: Replace image URI in ECS task definition
+      - name: Create ECS task definition dynamically
         run: |
-          sed -i "s|<IMAGE_URI>|$IMAGE_URI|g" Infrastructure/${{ secrets.TASK_DEF_FILE }}
-          sed -i "s|<EXECUTION_ROLE_ARN>|${{ secrets.EXECUTION_ROLE_ARN }}|g" Infrastructure/${{ secrets.TASK_DEF_FILE }}
+          cat <<EOF > task-def.json
+          {
+            "family": "${{ secrets.ECR_REPO }}",
+            "networkMode": "awsvpc",
+            "cpu": "${{ secrets.TASK_CPU }}",
+            "memory": "${{ secrets.TASK_MEMORY }}",
+            "requiresCompatibilities": ["FARGATE"],
+            "executionRoleArn": "${{ secrets.EXECUTION_ROLE_ARN }}",
+            "containerDefinitions": [
+              {
+                "name": "${{ secrets.CONTAINER_NAME }}",
+                "image": "${IMAGE_URI}",
+                "portMappings": [
+                  {
+                    "containerPort": ${{ secrets.CONTAINER_PORT }},
+                    "hostPort": ${{ secrets.CONTAINER_PORT }},
+                    "protocol": "tcp"
+                  }
+                ],
+                "essential": true
+              }
+            ]
+          }
+          EOF
 
       - name: Register new ECS task definition
         id: task-def
         run: |
           TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://Infrastructure/${{ secrets.TASK_DEF_FILE }} \
+            --cli-input-json file://task-def.json \
             --query "taskDefinition.taskDefinitionArn" \
             --output text)
           echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV

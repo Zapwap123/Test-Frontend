@@ -25,7 +25,6 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
       ECR_REPO: ${{ secrets.ECR_REPO }}
-      TASK_DEF_FILE: ${{ secrets.TASK_DEF_FILE }}
       EXECUTION_ROLE_ARN: ${{ secrets.EXECUTION_ROLE_ARN }}
 
   deploy:
@@ -37,6 +36,9 @@ jobs:
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
       ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
       ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
-      TASK_DEF_FILE: ${{ secrets.TASK_DEF_FILE }}
       ECR_REPO: ${{ secrets.ECR_REPO }}
       EXECUTION_ROLE_ARN: ${{ secrets.EXECUTION_ROLE_ARN }}
+      TASK_CPU: ${{ secrets.TASK_CPU }}
+      TASK_MEMORY: ${{ secrets.TASK_MEMORY }}
+      CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+      CONTAINER_PORT: ${{ secrets.CONTAINER_PORT }}
