@@ -14,7 +14,7 @@ on:
       TASK_DEF_FILE:
         required: true
       ECR_REPO:
-        required: true # newly added
+        required: true
 
 jobs:
   deploy:
