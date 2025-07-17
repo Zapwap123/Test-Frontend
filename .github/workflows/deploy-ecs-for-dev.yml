@@ -23,6 +23,10 @@ on:
         required: true
       CONTAINER_PORT:
         required: true
+      TASK_FAMILY:
+        required: true
+      TASK_LOG_GROUP:
+        required: true
 
 jobs:
   deploy:
@@ -51,7 +55,7 @@ jobs:
         run: |
           cat <<EOF > task-def.json
           {
-            "family": "${{ secrets.ECR_REPO }}",
+            "family": "${{ secrets.TASK_FAMILY }}",
             "networkMode": "awsvpc",
             "cpu": "${{ secrets.TASK_CPU }}",
             "memory": "${{ secrets.TASK_MEMORY }}",
@@ -68,7 +72,15 @@ jobs:
                     "protocol": "tcp"
                   }
                 ],
-                "essential": true
+                "essential": true,
+                "logConfiguration": {
+                  "logDriver": "awslogs",
+                  "options": {
+                    "awslogs-group": "${{ secrets.TASK_LOG_GROUP }}",
+                    "awslogs-region": "${{ secrets.AWS_REGION }}",
+                    "awslogs-stream-prefix": "frontend"
+                  }
+                }
               }
             ]
           }

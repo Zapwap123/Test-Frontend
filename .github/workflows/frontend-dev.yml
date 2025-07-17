@@ -42,3 +42,5 @@ jobs:
       TASK_MEMORY: ${{ secrets.TASK_MEMORY }}
       CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
       CONTAINER_PORT: ${{ secrets.CONTAINER_PORT }}
+      TASK_FAMILY: ${{ secrets.TASK_FAMILY }}
+      TASK_LOG_GROUP: ${{ secrets.TASK_LOG_GROUP }}
