@@ -52,4 +52,4 @@ jobs:
 
       - name: Update ECS task definition with image tag
         run: |
-          sed -i "s|<IMAGE_URI>|$IMAGE_URI|g" Infrastructure/ecs-task-def-frontend-dev.json
+          sed -i "s|<IMAGE_URI>|$IMAGE_URI|g" Infrastructure/${{ secrets.TASK_DEF_FILE }}
